@@ -10,6 +10,50 @@
         .hidden-video {
             display: none;
         }
+        .switch_label {
+            display: flex;
+            align-items: center;
+        }
+
+        input[type='checkbox'] {
+            position: absolute;
+            width: 0;
+            height: 0;
+        }
+
+        .base {
+            width: 56px;
+            border-radius: 15px;
+            height: 32px;
+            background-color: #ddd;
+        }
+
+        .title {
+            margin-left: 4px;
+        }
+        .circle {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: 24px;
+            height: 24px;
+            border-radius: 12px;
+            background-color: white;
+            transition: 0.5s;
+        }
+
+        input:checked ~ .base {
+            background-color: rgb(219, 234, 254);
+            transition: 0.5s;
+        }
+
+        input:checked ~ .circle {
+            transform: translateX(100%);
+            background-color: blue;
+        }
+        .switch {
+            position: relative;
+        }
     </style>
 </head>
 <body>
@@ -27,7 +71,17 @@
     <button id="start">start</button>
     <button id="replay" class="hidden-video">カメラリプレイ</button>
     <!-- <button id="stop">カメラ停止</button> -->
-    <p><a href="#" id="downloadlink" class="hidden-video" target="_blank">コードサイト</a></p>
+    <p><a href="#" id="downloadlink" class="hidden-video" target="_blank">コードサイト1</a></p>
+    <p><a href="#" id="downloadlink2" class="hidden-video" target="_blank">コードサイト2</a></p>
+    <label for="switch" class="switch_label">
+        <div class="switch">
+          <input type="checkbox" id="switch" />
+          <div class="circle"></div>
+          <div class="base"></div>
+        </div>
+        <span class="title">連続モード</span>
+      </label>
+  </body>
     <script src="script.js"></script>
 </body>
 </html>
