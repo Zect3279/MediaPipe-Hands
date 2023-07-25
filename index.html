@@ -6,17 +6,28 @@
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+    <style>
+        .hidden-video {
+            display: none;
+        }
+    </style>
 </head>
 <body>
+  <h1><span id="code_name">C</span>コードを弾こう！</h1>
+  <h2 id="reco" style="color: red;">・記録中</h2>
     <div class="container">
         <!-- Webカメラの映像（入力） -->
+        <video id="video_out">
+          <source src="#" type="video/webm">
+        </video>
         <video id="input"></video>
         <!--  認識した手の形状を可視化した映像（出力）  -->
         <canvas id="output" width="600" height="400"></canvas>
     </div>
     <button id="start">start</button>
-    <button id="stop">stop</button>
-    <p><a href="#" id="downloadlink" style="display:none;">ダウンロード</a></p>
+    <button id="replay" class="hidden-video">カメラリプレイ</button>
+    <!-- <button id="stop">カメラ停止</button> -->
+    <p><a href="#" id="downloadlink" class="hidden-video" target="_blank">コードサイト</a></p>
     <script src="script.js"></script>
 </body>
 </html>
