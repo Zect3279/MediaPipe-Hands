@@ -53,15 +53,18 @@ function getRandomGuitarChord() {
 }
 // コード
 
+const checkbox = document.getElementById('switch');
 var chordWeb = document.getElementById('downloadlink');
+var chordWeb2 = document.getElementById('downloadlink2');
 document.getElementById('start').addEventListener('click', () => {
   video.classList.remove("hidden-video");
   canvas.classList.remove("hidden-video");
   videoOut.classList.add('hidden-video');
   chordWeb.classList.add('hidden-video');
+  chordWeb2.classList.add('hidden-video');
   document.getElementById('start').classList.add('hidden-video')
   document.getElementById('replay').classList.add('hidden-video')
-  codeName.textContent = getRandomGuitarChord()
+  codeName.textContent = checkbox.checked ? getRandomGuitarChord() + "と" + getRandomGuitarChord() : getRandomGuitarChord();
   camera.start();
   reco.textContent = "録画開始まで...10"
   wait(900).then(() => {
@@ -105,8 +108,13 @@ document.getElementById('start').addEventListener('click', () => {
                                   videoOut.play()
                                   wait(6000).then(() => {
                                     reco.textContent = "再生終了 : startで再開"
+                                    const codes = codeName.textContent.split('と')
                                     chordWeb.classList.remove('hidden-video');
-                                    chordWeb.href = "https://muuu.jp/chords/#" + codeName.textContent.toLowerCase().replace('#', '3')
+                                    chordWeb.href = "https://muuu.jp/chords/#" + codes[0].toLowerCase().replace('#', '3')
+                                    if (codes.length == 2) {
+                                      chordWeb2.classList.remove('hidden-video');
+                                      chordWeb2.href = "https://muuu.jp/chords/#" + codes[1].toLowerCase().replace('#', '3')
+                                    }
                                     document.getElementById('start').classList.remove('hidden-video')
                                     document.getElementById('replay').classList.remove('hidden-video')
                                   })
