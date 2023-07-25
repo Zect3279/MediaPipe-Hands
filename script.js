@@ -1,6 +1,16 @@
+// 開発で考えたこと
+//
+// MediaPipe Handsの資料がほぼ無い
+// -> その機構はあまりいじらない
+// 
+// 録画配信を調べる
+// -> canvasを録画する関数があるらしい
+// -> 公式サンプルをパクる
+//
+//
 const codeName = document.getElementById('code_name');
 const reco = document.getElementById('reco');
-reco.textContent = ""
+reco.textContent = "フォルダ内の全ての'handMovie_{index}.webm'を削除してから開始してください"
 
 const videoOut = document.getElementById('video_out');
 videoOut.classList.add("hidden-video");
@@ -11,6 +21,8 @@ const ctx = canvas.getContext('2d');
 const config = {
   locateFile: file => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
 };
+
+var videoIndex = 0
 
 const hands = new Hands(config);
 
@@ -57,6 +69,7 @@ const checkbox = document.getElementById('switch');
 var chordWeb = document.getElementById('downloadlink');
 var chordWeb2 = document.getElementById('downloadlink2');
 document.getElementById('start').addEventListener('click', () => {
+  videoIndex += 1;
   video.classList.remove("hidden-video");
   canvas.classList.remove("hidden-video");
   videoOut.classList.add('hidden-video');
@@ -66,6 +79,7 @@ document.getElementById('start').addEventListener('click', () => {
   document.getElementById('replay').classList.add('hidden-video')
   codeName.textContent = checkbox.checked ? getRandomGuitarChord() + "と" + getRandomGuitarChord() : getRandomGuitarChord();
   camera.start();
+  // ここの処理、本当はダメ
   reco.textContent = "録画開始まで...10"
   wait(900).then(() => {
     reco.textContent = "録画開始まで...9"
@@ -97,13 +111,13 @@ document.getElementById('start').addEventListener('click', () => {
                             wait(900).then(() => {
                               reco.textContent = "記録中 : 4"
                               wait(900).then(() => {
-                                reco.textContent = "記録終了: 10秒後に再生します。必ず「movie.webm」として保存してください"
+                                reco.textContent = "記録終了: 10秒後に再生します。"
                                 recorder.stop();
                                 wait(10000).then(() => {
                                   video.classList.add("hidden-video");
                                   canvas.classList.add("hidden-video");
                                   videoOut.classList.remove('hidden-video');
-                                  videoOut.src = "movie.webm"
+                                  videoOut.src = `handMovie_${videoIndex}.webm`
                                   videoOut.load()
                                   videoOut.play()
                                   wait(6000).then(() => {
@@ -169,7 +183,7 @@ const anchor = document.createElement('a');
 recorder.ondataavailable = function(e) {
   var videoBlob = new Blob([e.data], { type: e.data.type });
   blobUrl = window.URL.createObjectURL(videoBlob);
-  anchor.download = 'movie.webm';
+  anchor.download = `handMovie_${videoIndex}.webm`;
   anchor.href = blobUrl;
   anchor.style.display = 'block';
   document.body.appendChild(anchor);
