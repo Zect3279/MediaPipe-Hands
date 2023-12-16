@@ -74,25 +74,20 @@
     </style>
 </head>
 <body>
-    <label for="audio-input">音声入力デバイス:</label>
-    <select id="audio-input"></select>
+    <!-- <label for="audio-input">音声入力デバイス:</label>
+    <select id="audio-input"></select> -->
 
     <label for="video-input">映像入力デバイス:</label>
     <select id="video-input"></select>
 
     <button id="start-button" onclick="startRecording()">Start</button>
     <br>
-    <div id="video-container" style="display: none;">
-        <video id="video" autoplay playsinline muted></video>
-    </div>
-    <canvas id="output" width="600" height="400"></canvas>
-
     <div id="chord-display" style="display: none;">
         <p id="chord-label">お題</p>
         <p id="random-chord"></p>
     </div>
 
-    <div id="countdown" style="display: none;">こんにちは</div>
+    <div id="countdown" style="display: none;"></div>
 
     <div id="recording-status" style="display: none;"></div>
 
@@ -100,9 +95,18 @@
         <label for="duration">録画時間（秒）:</label>
         <input type="number" id="duration" min="1" value="5">
     </div>
+    <br>
+
+    <div id="video-container" style="display: none;">
+        <video id="video" autoplay playsinline muted></video>
+    </div>
+    <canvas id="output" width="1280" height="720"></canvas>
+
 
     <button id="record-button" onclick="recordVideo()" style="display: none;">Record</button>
     <button id="retry-button" onclick="retryRecording()" style="display: none;">もう一度</button>
+
+    <video id="recorded-video"></video>
 
     <div id="youtube-container">
         <input type="text" id="youtube-input" placeholder="YouTube動画のURLを入力">
@@ -117,32 +121,32 @@
         let audioChunks = [];
         let resizing = false;
 
+        const existingVideo = document.getElementById('recorded-video');
         const video = document.getElementById('video');
         const canvas = document.getElementById('output');
         const ctx = canvas.getContext('2d');
         const config = {
-        locateFile: file => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+            locateFile: file => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
         };
         const hands = new Hands(config);
-        const camera = new Camera(video, {
-            onFrame: async () => {
-                await hands.send({image: video});
-            },
-            width: 600,
-            height: 400
-        });
+
+        var camera;
+
         hands.setOptions({
             maxNumHands: 1,
             modelComplexity: 1,
             minDetectionConfidence: 0.5,
             minTrackingConfidence: 0.5
         });
+        existingVideo.classList.add("hidden-video");
         canvas.classList.add("hidden-video");
 
         const startRecording = async () => {
             try {
+                existingVideo.classList.add("hidden-video");
                 canvas.classList.remove("hidden-video");
                 // カメラとマイクのストリームを取得
+                await getMediaStream();
                 camera.start();
                 // const mediaStream = await getMediaStream();
                 const mediaStream = document.getElementById('output').captureStream();
@@ -169,21 +173,46 @@
         }
 
         async function getMediaStream() {
-            const audioInputSelect = document.getElementById('audio-input');
+            // const audioInputSelect = document.getElementById('audio-input');
+            // const videoInputSelect = document.getElementById('video-input');
+
+            // // オーディオ入力デバイスの選択肢を追加
+            // const audioInputDevices = await navigator.mediaDevices.enumerateDevices();
+            // audioInputDevices
+            //     .filter(device => device.kind === 'audioinput')
+            //     .forEach(device => {
+            //         const option = document.createElement('option');
+            //         option.value = device.deviceId;
+            //         option.text = device.label || `Microphone ${audioInputSelect.length + 1}`;
+            //         audioInputSelect.appendChild(option);
+            //     });
+
+            // // 映像入力デバイスの選択肢を追加
+            // const videoInputDevices = await navigator.mediaDevices.enumerateDevices();
+            // videoInputDevices
+            //     .filter(device => device.kind === 'videoinput')
+            //     .forEach(device => {
+            //         const option = document.createElement('option');
+            //         option.value = device.deviceId;
+            //         option.text = device.label || `Camera ${videoInputSelect.length + 1}`;
+            //         videoInputSelect.appendChild(option);
+            //     });
+
+            // // 選択されたオーディオ入力デバイスのID
+            // const selectedAudioInput = audioInputSelect.value;
+
+            // // 選択された映像入力デバイスのID
+            // const selectedVideoInput = videoInputSelect.value;
+
+            // // カメラと選択されたオーディオ入力デバイスのストリームを取得
+            // const mediaStream = await navigator.mediaDevices.getUserMedia({
+            //     video: { width: 1280, height: 720, deviceId: selectedVideoInput },
+            //     audio: { deviceId: selectedAudioInput }
+            // });
+
+            // return mediaStream;
+
             const videoInputSelect = document.getElementById('video-input');
-
-            // オーディオ入力デバイスの選択肢を追加
-            const audioInputDevices = await navigator.mediaDevices.enumerateDevices();
-            audioInputDevices
-                .filter(device => device.kind === 'audioinput')
-                .forEach(device => {
-                    const option = document.createElement('option');
-                    option.value = device.deviceId;
-                    option.text = device.label || `Microphone ${audioInputSelect.length + 1}`;
-                    audioInputSelect.appendChild(option);
-                });
-
-            // 映像入力デバイスの選択肢を追加
             const videoInputDevices = await navigator.mediaDevices.enumerateDevices();
             videoInputDevices
                 .filter(device => device.kind === 'videoinput')
@@ -193,20 +222,15 @@
                     option.text = device.label || `Camera ${videoInputSelect.length + 1}`;
                     videoInputSelect.appendChild(option);
                 });
-
-            // 選択されたオーディオ入力デバイスのID
-            const selectedAudioInput = audioInputSelect.value;
-
-            // 選択された映像入力デバイスのID
             const selectedVideoInput = videoInputSelect.value;
-
-            // カメラと選択されたオーディオ入力デバイスのストリームを取得
-            const mediaStream = await navigator.mediaDevices.getUserMedia({
-                video: { width: 1280, height: 720, deviceId: selectedVideoInput },
-                audio: { deviceId: selectedAudioInput }
+            camera = new Camera(video, {
+                onFrame: async () => {
+                    await hands.send({image: video});
+                },
+                width: 1280,
+                height: 720,
+                deviceId: selectedVideoInput
             });
-
-            return mediaStream;
         }
 
         function recordVideo() {
@@ -233,18 +257,17 @@
                 document.getElementById('record-button').style.display = 'none';
                 document.getElementById('retry-button').style.display = 'block';
 
-                const recordedVideo = document.createElement('video');
-                recordedVideo.src = recordedUrl;
-                recordedVideo.controls = true;
+                // const existingVideo = document.createElement('video');
+                existingVideo.src = recordedUrl;
+                existingVideo.controls = true;
 
-                // 前回の録画結果を削除
-                const existingVideo = document.getElementById('recorded-video');
-                if (existingVideo) {
-                    document.body.removeChild(existingVideo);
-                }
+                // // 前回の録画結果を削除
+                // if (existingVideo) {
+                //     document.body.removeChild(existingVideo);
+                // }
 
-                recordedVideo.id = 'recorded-video';
-                document.body.appendChild(recordedVideo);
+                // recordedVideo.id = 'recorded-video';
+                // document.body.appendChild(recordedVideo);
 
                 // 「お題」の表記を「録画終了」に変更
                 document.getElementById('chord-label').textContent = '録画終了';
@@ -253,18 +276,19 @@
             document.getElementById('recording-status').textContent = 'Recording...';
             document.getElementById('record-button').style.display = 'none';
 
-            let count = 1;
+            let count = 0;
             const countdownDisplay = document.getElementById('countdown');
             countdownDisplay.textContent = '記録中';
 
             // カウントダウン中に録画開始
             const countIntervalId = setInterval(() => {
-                countdownDisplay.textContent = count;
+                countdownDisplay.textContent = `撮影中 : ${count}s 経過`;
 
-                if (count >= duration) {
+                if (count > duration) {
                     clearInterval(countIntervalId);
                     recorder.stop();
                     canvas.classList.add("hidden-video");
+                    existingVideo.classList.remove("hidden-video");
                 }
 
                 count++;
@@ -319,7 +343,7 @@
             let count = seconds;
 
             const intervalId = setInterval(() => {
-                countdownDisplay.textContent = count;
+                countdownDisplay.textContent = `撮影まで : ${count}s`;
 
                 if (count <= 0) {
                     clearInterval(intervalId);
