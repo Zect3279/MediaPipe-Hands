@@ -166,7 +166,7 @@
 
                 // お題表示とカウントダウン開始
                 displayRandomChord();
-                countdown(10, recordVideo);
+                countdown(5, recordVideo);
             } catch (error) {
                 console.error('Error accessing webcam: ', error);
             }
@@ -214,6 +214,7 @@
 
             const videoInputSelect = document.getElementById('video-input');
             const videoInputDevices = await navigator.mediaDevices.enumerateDevices();
+            console.log(videoInputDevices);
             videoInputDevices
                 .filter(device => device.kind === 'videoinput')
                 .forEach(device => {
